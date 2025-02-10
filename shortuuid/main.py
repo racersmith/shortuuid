@@ -1,7 +1,6 @@
 """Concise UUID generation."""
 
 import math
-import secrets
 import uuid as _uu
 from typing import List
 from typing import Optional
@@ -63,21 +62,16 @@ class ShortUUID(object):
             pad_length = self._length
         return int_to_string(uuid.int, self._alphabet, padding=pad_length)
 
-    def decode(self, string: str, legacy: bool = False) -> _uu.UUID:
+    def decode(self, string: str) -> _uu.UUID:
         """
         Decode a string according to the current alphabet into a UUID.
 
         Raises ValueError when encountering illegal characters or a too-long string.
 
         If string too short, fills leftmost (MSB) bits with 0.
-
-        Pass `legacy=True` if your UUID was encoded with a ShortUUID version prior to
-        1.0.0.
         """
         if not isinstance(string, str):
             raise ValueError("Input `string` must be a str.")
-        if legacy:
-            string = string[::-1]
         return _uu.UUID(int=string_to_int(string, self._alphabet))
 
     def uuid(self, name: Optional[str] = None, pad_length: Optional[int] = None) -> str:
@@ -99,12 +93,6 @@ class ShortUUID(object):
             u = _uu.uuid5(_uu.NAMESPACE_DNS, name)
         return self.encode(u, pad_length)
 
-    def random(self, length: Optional[int] = None) -> str:
-        """Generate and return a cryptographically secure short random string of `length`."""
-        if length is None:
-            length = self._length
-
-        return "".join(secrets.choice(self._alphabet) for _ in range(length))
 
     def get_alphabet(self) -> str:
         """Return the current alphabet used for new UUIDs."""
@@ -132,6 +120,5 @@ _global_instance = ShortUUID()
 encode = _global_instance.encode
 decode = _global_instance.decode
 uuid = _global_instance.uuid
-random = _global_instance.random
 get_alphabet = _global_instance.get_alphabet
 set_alphabet = _global_instance.set_alphabet
